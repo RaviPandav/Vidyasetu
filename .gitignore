@@ -1,0 +1,26 @@
+# Root
+node_modules/
+.env
+.DS_Store
+*.log
+
+# Server
+server/node_modules/
+server/.env
+server/uploads/videos/*
+server/uploads/notes/*
+server/uploads/avatars/*
+!server/uploads/videos/.gitkeep
+!server/uploads/notes/.gitkeep
+!server/uploads/avatars/.gitkeep
+
+# Client
+client/node_modules/
+client/dist/
+client/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
