@@ -31,6 +31,7 @@ const studentRoutes = require("./routes/student/studentRoutes");
 connectDB();
 
 const app = express();
+const Port = process.env.PORT || 4000;
 const server = http.createServer(app);
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
