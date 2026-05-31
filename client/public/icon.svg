@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="VidyaSetu">
+  <rect width="512" height="512" rx="96" fill="#2563eb"/>
+  <path d="M128 160c48-22 96-22 144 0 40-18 80-21 120-9v216c-40-12-80-9-120 9-48-22-96-22-144 0V160Z" fill="#ffffff"/>
+  <path d="M272 160v216" stroke="#2563eb" stroke-width="20" stroke-linecap="round"/>
+  <path d="M160 206c30-8 58-7 84 3M160 252c30-8 58-7 84 3M300 209c21-7 42-8 64-3M300 255c21-7 42-8 64-3" stroke="#2563eb" stroke-width="18" stroke-linecap="round"/>
+</svg>

@@ -25,6 +25,7 @@ export default function CourseDetailPage() {
   const [loading, setLoading] = useState(true);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [openSection, setOpenSection] = useState(0);
+  const [isEnrolled, setIsEnrolled] = useState(false);
 
   useEffect(() => {
     publicService.getCourse(slug)
@@ -33,9 +34,28 @@ export default function CourseDetailPage() {
       .finally(() => setLoading(false));
   }, [slug]);
 
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== "student" || !course?._id) {
+      setIsEnrolled(false);
+      return;
+    }
+
+    studentService
+      .getEnrolledCourses()
+      .then((res) => {
+        const enrolled = (res.data.courses || []).some((enrollment) => {
+          const enrolledCourse = enrollment.course;
+          return (enrolledCourse?._id || enrolledCourse)?.toString() === course._id.toString();
+        });
+        setIsEnrolled(enrolled);
+      })
+      .catch(() => setIsEnrolled(false));
+  }, [isAuthenticated, user?.role, course?._id]);
+
   const handleEnroll = async () => {
     if (!isAuthenticated) { navigate("/login"); return; }
     if (user?.role !== "student") { toast.error("Only students can enroll"); return; }
+    if (isEnrolled) { navigate(`/student/courses/${course._id}/watch`); return; }
 
     try {
       setPaymentLoading(true);
@@ -43,6 +63,7 @@ export default function CourseDetailPage() {
 
       if (payableAmount <= 0) {
         const res = await studentService.enroll(course._id);
+        setIsEnrolled(true);
         toast.success(res.data.message || "Enrolled successfully!");
         navigate("/student/courses");
         return;
@@ -91,7 +112,13 @@ export default function CourseDetailPage() {
       });
       razorpay.open();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Unable to start payment.");
+      if (error.response?.data?.message === "Already enrolled.") {
+        setIsEnrolled(true);
+        toast.success("You are already enrolled. Continue learning from your course page.");
+        navigate(`/student/courses/${course._id}/watch`);
+      } else {
+        toast.error(error.response?.data?.message || "Unable to start payment.");
+      }
       setPaymentLoading(false);
     }
   };
@@ -214,7 +241,13 @@ export default function CourseDetailPage() {
                 )}
               </div>
               <button onClick={handleEnroll} disabled={paymentLoading} className="btn-primary w-full py-3 text-base mb-4">
-                {paymentLoading ? "Processing..." : isAuthenticated ? "Enroll Now" : "Login to Enroll"}
+                {paymentLoading
+                  ? "Processing..."
+                  : isEnrolled
+                    ? "Continue Learning"
+                    : isAuthenticated
+                      ? "Enroll Now"
+                      : "Login to Enroll"}
               </button>
               <p className="text-center text-xs text-gray-400 mb-4">30-day money-back guarantee</p>
               <ul className="space-y-2 text-sm text-gray-700">

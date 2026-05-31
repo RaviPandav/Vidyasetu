@@ -15,6 +15,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const connectDB = require("./config/db");
+const { corsOptions } = require("./config/corsOptions");
 const { initSocket } = require("./sockets/socketManager");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -43,14 +44,7 @@ initSocket(server);
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(mongoSanitize());
 
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors(corsOptions));
 
 // ── Rate Limiting ───────────────────────────────────────
 const parseEnvNumber = (value, fallback) => {

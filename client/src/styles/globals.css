@@ -100,6 +100,38 @@
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
+
+  .subject-marquee {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .subject-marquee-track {
+    animation: subject-marquee 34s linear infinite;
+  }
+
+  .subject-marquee:hover .subject-marquee-track {
+    animation-play-state: paused;
+  }
+
+  .hero-grid {
+    background-image:
+      linear-gradient(rgba(108, 99, 255, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(108, 99, 255, 0.08) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+
+  .hero-preview {
+    position: relative;
+  }
+
+  .hero-preview::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.38) 50%, transparent 65%);
+    animation: preview-shine 5.5s ease-in-out infinite;
+  }
   
   .delay-1 { animation-delay: 0.1s; }
   .delay-2 { animation-delay: 0.2s; }
@@ -188,6 +220,24 @@
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+@keyframes subject-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes preview-shine {
+  0%, 35% {
+    transform: translateX(-100%);
+  }
+  70%, 100% {
+    transform: translateX(100%);
   }
 }
 

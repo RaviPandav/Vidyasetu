@@ -1,7 +1,5 @@
-    import { Link } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-
 import {
   AcademicCapIcon,
   VideoCameraIcon,
@@ -67,9 +65,33 @@ const categories = [
   "Data Science",
   "Artificial Intelligence (AI)",
   "Web Development",
+  "Full Stack Development",
+  "Python",
+  "Java",
+  "Data Structures & Algorithms",
   "Cloud Computing",
   "Cyber Security",
   "Machine Learning",
+  "DevOps",
+  "Database Management",
+  "Software Testing",
+  "Mobile App Development",
+  "UI/UX Design",
+  "Digital Marketing",
+  "Graphic Design",
+  "Video Editing",
+  "Mathematics",
+  "Science",
+  "Commerce",
+  "English Language",
+  "Communication Skills",
+  "Competitive Exam Preparation",
+];
+
+const previewItems = [
+  { label: "Live Class", value: "Physics - 7:30 PM", icon: VideoCameraIcon, progress: 82 },
+  { label: "Quiz Score", value: "92% completed", icon: ClipboardDocumentListIcon, progress: 92 },
+  { label: "Mentor Reply", value: "Doubt answered", icon: AcademicCapIcon, progress: 88 },
 ];
 
 const fadeUp = {
@@ -81,39 +103,21 @@ const fadeUp = {
 export default function HomePage() {
   return (
     <div>
-      {/* ── Hero Section ─────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 py-20 md:py-32">
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-primary-200/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-accent-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-
+      <section className="hero-grid relative overflow-hidden bg-white py-20 dark:bg-gray-950 md:py-28">
         <div className="page-container relative">
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={{ filter: ["blur(0px)", "blur(0px)"] }}
-            className="absolute inset-x-0 top-0 -z-10 pointer-events-none"
-          >
-            <motion.div
-              aria-hidden
-              className="absolute right-1/4 top-10 w-64 h-64 bg-primary-200/30 rounded-full blur-3xl"
-              animate={{ x: [0, 24, 0], y: [0, -18, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </motion.div>
-
-          <div className="max-w-3xl mx-auto text-center">
+          <div className="mx-auto max-w-4xl text-center">
             <motion.div
               {...fadeUp}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-sm font-semibold mb-6"
+              className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white px-4 py-2 text-sm font-semibold text-primary-700 shadow-sm dark:border-primary-900 dark:bg-gray-900 dark:text-primary-300"
             >
-              🎓 Gujarat's #1 Online Coaching Platform
+              Gujarat's trusted online coaching platform
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="font-heading text-4xl md:text-6xl font-bold text-gray-900 dark:text-white leading-tight mb-6"
+              className="mb-6 font-heading text-4xl font-bold leading-tight text-gray-950 dark:text-white md:text-6xl"
             >
               Your Bridge to
               <span className="gradient-text block">Academic Excellence</span>
@@ -123,22 +127,22 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed"
+              className="mx-auto mb-10 max-w-3xl text-lg leading-relaxed text-gray-600 dark:text-gray-300 md:text-xl"
             >
               Join thousands of students across Gujarat learning with expert teachers,
-              live classes, and comprehensive study material — all in one place.
+              live classes, and comprehensive study material in one focused platform.
             </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
+              className="flex flex-col justify-center gap-4 sm:flex-row"
             >
-              <Link to="/register" className="btn-primary text-base px-8 py-3">
-                Start Learning Free <ArrowRightIcon className="w-5 h-5" />
+              <Link to="/register" className="btn-primary px-8 py-3 text-base">
+                Start Learning Free <ArrowRightIcon className="h-5 w-5" />
               </Link>
-              <Link to="/courses" className="btn-secondary text-base px-8 py-3">
+              <Link to="/courses" className="btn-secondary px-8 py-3 text-base">
                 Explore Courses
               </Link>
             </motion.div>
@@ -147,25 +151,59 @@ export default function HomePage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="flex items-center justify-center gap-2 mt-8 text-sm text-gray-500"
+              className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-gray-500"
             >
-              <CheckCircleIcon className="w-4 h-4 text-success-500" />
-              No credit card required
-              <span className="mx-2">·</span>
-              <CheckCircleIcon className="w-4 h-4 text-success-500" />
-              Free courses available
-              <span className="mx-2">·</span>
-              <CheckCircleIcon className="w-4 h-4 text-success-500" />
-              Gujarati & English
+              {["No credit card required", "Free courses available", "Gujarati & English"].map((item) => (
+                <span key={item} className="inline-flex items-center gap-1.5">
+                  <CheckCircleIcon className="h-4 w-4 text-success-500" />
+                  {item}
+                </span>
+              ))}
             </motion.div>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 34, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, delay: 0.45 }}
+            className="hero-preview mx-auto mt-14 max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl shadow-primary-500/10 dark:border-gray-800 dark:bg-gray-900"
+          >
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-gray-800">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary-600">Student Dashboard</p>
+                <h3 className="font-heading text-lg font-bold text-gray-950 dark:text-white">Today's learning plan</h3>
+              </div>
+              <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">
+                Live
+              </span>
+            </div>
+
+            <div className="grid gap-4 p-5 md:grid-cols-3">
+              {previewItems.map(({ label, value, icon: Icon, progress }, idx) => (
+                <motion.div
+                  key={label}
+                  className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-left dark:border-gray-800 dark:bg-gray-950"
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 3.2, repeat: Infinity, delay: idx * 0.35, ease: "easeInOut" }}
+                >
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 text-primary-600 dark:bg-primary-900/40">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <p className="text-sm font-semibold text-gray-950 dark:text-white">{label}</p>
+                  <p className="mt-1 text-sm text-gray-500">{value}</p>
+                  <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+                    <div className="h-full rounded-full bg-primary-500" style={{ width: `${progress}%` }} />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ── Stats ────────────────────────────────────── */}
-      <section className="py-12 bg-primary-500">
+      <section className="bg-primary-600 py-12">
         <div className="page-container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
             {stats.map((stat, idx) => (
               <motion.div
                 key={stat.label}
@@ -175,26 +213,23 @@ export default function HomePage() {
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ duration: 0.5, delay: idx * 0.05 }}
               >
-                <div className="font-heading text-3xl font-bold text-white mb-1">
-                  {stat.value}
-                </div>
-                <div className="text-primary-200 text-sm">{stat.label}</div>
+                <div className="mb-1 font-heading text-3xl font-bold text-white">{stat.value}</div>
+                <div className="text-sm text-primary-100">{stat.label}</div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Categories ───────────────────────────────── */}
-      <section className="py-16 bg-white dark:bg-gray-900">
+      <section className="bg-white py-16 dark:bg-gray-900">
         <div className="page-container">
-          <div className="text-center mb-10">
+          <div className="mb-10 text-center">
             <motion.h2
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.5 }}
-              className="section-heading mb-3"
+              className="section-heading mb-3 dark:text-white"
             >
               Explore by Subject
             </motion.h2>
@@ -208,40 +243,32 @@ export default function HomePage() {
               Find courses across all major subjects and competitive exams
             </motion.p>
 
-            {/* Subject buttons: left-to-right slide-in animation + display */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-              {categories.map((cat, i) => (
-                <motion.div
-                  key={cat}
-                  initial={{ opacity: 0, x: 0 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.35, delay: i * 0.04, ease: "linear" }}
-                  className="origin-center"
-                >
+            <div className="subject-marquee mx-auto mt-8 max-w-6xl overflow-hidden">
+              <div className="subject-marquee-track flex w-max gap-3">
+                {[...categories, ...categories].map((cat, i) => (
                   <Link
+                    key={`${cat}-${i}`}
                     to={`/courses?category=${encodeURIComponent(cat)}`}
-                    className="inline-flex items-center gap-2 px-5 py-2 rounded-full border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-medium hover:border-primary-500 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all"
+                    className="inline-flex h-11 shrink-0 items-center rounded-full border-2 border-gray-200 bg-white px-5 text-sm font-semibold text-gray-700 transition-all hover:border-primary-500 hover:bg-primary-50 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:bg-primary-900/20"
                   >
-                    <span className="leading-none">{cat}</span>
+                    {cat}
                   </Link>
-                </motion.div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Features ─────────────────────────────────── */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800">
+      <section className="bg-gray-50 py-20 dark:bg-gray-800">
         <div className="page-container">
-          <div className="text-center mb-14">
+          <div className="mb-14 text-center">
             <motion.h2
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.5 }}
-              className="section-heading mb-3"
+              className="section-heading mb-3 dark:text-white"
             >
               Everything You Need to Succeed
             </motion.h2>
@@ -250,48 +277,43 @@ export default function HomePage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.5, delay: 0.05 }}
-              className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto"
+              className="mx-auto max-w-2xl text-gray-600 dark:text-gray-400"
             >
               VidyaSetu brings together all the tools modern students and teachers need in one powerful platform.
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {features.map(({ icon: Icon, title, desc }, idx) => (
               <motion.div
                 key={title}
-                whileHover={{ y: -4 }}
+                whileHover={{ y: -6 }}
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ duration: 0.55, delay: idx * 0.04 }}
-                className="card text-center"
+                className="card group text-center transition-all duration-200 hover:border-primary-200 hover:shadow-card-hover"
               >
-                <div className="w-14 h-14 bg-primary-100 dark:bg-primary-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Icon className="w-7 h-7 text-primary-600" />
+                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary-100 transition-colors group-hover:bg-primary-500 dark:bg-primary-900/30">
+                  <Icon className="h-7 w-7 text-primary-600 transition-colors group-hover:text-white" />
                 </div>
-                <h3 className="font-heading font-bold text-lg mb-2 text-gray-900 dark:text-white">
-                  {title}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
-                  {desc}
-                </p>
+                <h3 className="mb-2 font-heading text-lg font-bold text-gray-900 dark:text-white">{title}</h3>
+                <p className="text-sm leading-relaxed text-gray-600 dark:text-gray-400">{desc}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Testimonials ─────────────────────────────── */}
-      <section className="py-20 bg-white dark:bg-gray-900">
+      <section className="bg-white py-20 dark:bg-gray-900">
         <div className="page-container">
-          <div className="text-center mb-14">
+          <div className="mb-14 text-center">
             <motion.h2
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.5 }}
-              className="section-heading mb-3"
+              className="section-heading mb-3 dark:text-white"
             >
               Students Love VidyaSetu
             </motion.h2>
@@ -306,7 +328,7 @@ export default function HomePage() {
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {testimonials.map((t, idx) => (
               <motion.div
                 key={t.name}
@@ -316,25 +338,20 @@ export default function HomePage() {
                 viewport={{ once: true, amount: 0.25 }}
                 transition={{ duration: 0.55, delay: idx * 0.06 }}
               >
-                <div className="flex gap-1 mb-4">
+                <div className="mb-4 flex gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <StarIcon
-                      key={i}
-                      className="w-4 h-4 text-yellow-400 fill-yellow-400"
-                    />
+                    <StarIcon key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
-                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6 italic">
+                <p className="mb-6 text-sm italic leading-relaxed text-gray-600 dark:text-gray-400">
                   "{t.text}"
                 </p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-500 font-bold text-white">
                     {t.avatar}
                   </div>
                   <div>
-                    <div className="font-semibold text-gray-900 dark:text-white text-sm">
-                      {t.name}
-                    </div>
+                    <div className="text-sm font-semibold text-gray-900 dark:text-white">{t.name}</div>
                     <div className="text-xs text-gray-500">{t.grade}</div>
                   </div>
                 </div>
@@ -344,15 +361,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── CTA ──────────────────────────────────────── */}
-      <section className="py-20 bg-gradient-to-r from-primary-500 to-primary-700">
+      <section className="bg-primary-700 py-20">
         <div className="page-container text-center">
           <motion.h2
             initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ duration: 0.5 }}
-            className="font-heading text-3xl md:text-4xl font-bold text-white mb-4"
+            className="mb-4 font-heading text-3xl font-bold text-white md:text-4xl"
           >
             Ready to Start Your Journey?
           </motion.h2>
@@ -361,7 +377,7 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ duration: 0.5, delay: 0.05 }}
-            className="text-primary-200 mb-8 text-lg"
+            className="mb-8 text-lg text-primary-100"
           >
             Join 10,000+ students already learning on VidyaSetu
           </motion.p>
@@ -370,17 +386,17 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ duration: 0.55 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
+            className="flex flex-col justify-center gap-4 sm:flex-row"
           >
             <Link
               to="/register"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-white text-primary-600 font-bold rounded-xl hover:bg-primary-50 transition-all"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-8 py-3 font-bold text-primary-600 transition-all hover:bg-primary-50"
             >
-              Create Free Account <ArrowRightIcon className="w-5 h-5" />
+              Create Free Account <ArrowRightIcon className="h-5 w-5" />
             </Link>
             <Link
               to="/courses"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 border-2 border-white text-white font-bold rounded-xl hover:bg-white/10 transition-all"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-white px-8 py-3 font-bold text-white transition-all hover:bg-white/10"
             >
               Browse Courses
             </Link>
@@ -390,4 +406,3 @@ export default function HomePage() {
     </div>
   );
 }
-
