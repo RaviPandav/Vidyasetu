@@ -1,16 +1,8 @@
 import { useEffect, useState } from "react";
 import { teacherService } from "../../services";
 import toast from "react-hot-toast";
+import { getAssetUrl } from "../../utils/urls";
 import { PlusIcon, PencilIcon, VideoCameraIcon } from "@heroicons/react/24/outline";
-
-const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
-
-const getAssetUrl = (url) => {
-  if (!url) return "";
-  if (/^https?:\/\//i.test(url)) return url;
-  const normalized = url.startsWith("/") ? url : `/${url}`;
-  return `${API_ORIGIN}${normalized}`;
-};
 
 const CATEGORIES = [
   "Programming",

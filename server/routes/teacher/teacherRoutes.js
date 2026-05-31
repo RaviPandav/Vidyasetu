@@ -55,8 +55,8 @@ router.get("/dashboard", getTeacherDashboard);
 router.get("/courses", getMyCourses);
 router.get("/courses/:id", getCourse);
 router.get("/courses/:id/students", getCourseStudents);
-router.post("/courses", upload.fields([{ name: "thumbnail", maxCount: 1 }]), createCourse);
-router.put("/courses/:id", upload.fields([{ name: "thumbnail", maxCount: 1 }]), updateCourse);
+router.post("/courses", upload.fields([{ name: "thumbnail", maxCount: 1 }, { name: "video", maxCount: 1 }]), createCourse);
+router.put("/courses/:id", upload.fields([{ name: "thumbnail", maxCount: 1 }, { name: "video", maxCount: 1 }]), updateCourse);
 router.post("/courses/:id/publish", publishCourse);
 router.post("/courses/:id/sections", addSection);
 router.post(

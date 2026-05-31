@@ -2,16 +2,18 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
+const uploadsRoot = path.join(__dirname, "..", "uploads");
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    let uploadPath = "uploads/avatars/";
+    let uploadPath = path.join(uploadsRoot, "avatars");
 
     if (file.fieldname === "thumbnail") {
-      uploadPath = "uploads/thumbnails/";
+      uploadPath = path.join(uploadsRoot, "thumbnails");
     } else if (file.mimetype.startsWith("video/")) {
-      uploadPath = "uploads/videos/";
+      uploadPath = path.join(uploadsRoot, "videos");
     } else if (file.mimetype === "application/pdf") {
-      uploadPath = "uploads/notes/";
+      uploadPath = path.join(uploadsRoot, "notes");
     }
 
     fs.mkdirSync(uploadPath, { recursive: true });

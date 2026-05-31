@@ -6,7 +6,7 @@ import { EnvelopeIcon, MapPinIcon, PhoneIcon, PaperAirplaneIcon } from "@heroico
 import ContactMap from "../../components/ContactMap";
 
 const contactItems = [
-  { icon: PhoneIcon, label: "Phone", value: "+91 98765 43210", color: "bg-primary-100 text-primary-600" },
+  { icon: PhoneIcon, label: "Phone", value: "+91 9558453510", color: "bg-primary-100 text-primary-600" },
   { icon: EnvelopeIcon, label: "Email", value: "hello@vidyasetu.com", color: "bg-green-100 text-green-600" },
   { icon: MapPinIcon, label: "Address", value: "Surat, Gujarat, India", color: "bg-orange-100 text-orange-600" },
 ];
@@ -101,7 +101,7 @@ export default function ContactPage() {
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Phone</label>
-                  <input type="tel" className="input-field" placeholder="+91 98765 43210" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                  <input type="tel" className="input-field" placeholder="+91 9558453510" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Subject</label>

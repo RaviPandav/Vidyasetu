@@ -95,7 +95,7 @@ export default function RegisterPage() {
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 className="input-field"
-                placeholder="+91 98765 43210"
+                placeholder="+91 9558453510"
               />
             </div>
 

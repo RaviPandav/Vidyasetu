@@ -1,5 +1,49 @@
 const Course = require("../../models/Course");
 const User = require("../../models/User");
+const {
+  uploadThumbnail,
+  uploadVideo,
+  deleteFromCloudinary,
+} = require("../../services/cloudinaryService");
+
+const isHttpUrl = (value) => /^https?:\/\/\S+$/i.test(value || "");
+const isLocalUploadUrl = (value) => /^\/?uploads\//i.test(value || "");
+
+const requireValidRemoteVideo = (videoUrl) => {
+  if (!videoUrl) return;
+  if (isLocalUploadUrl(videoUrl)) {
+    const error = new Error("Local video paths are not allowed. Upload the video to Cloudinary.");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!isHttpUrl(videoUrl)) {
+    const error = new Error("Video URL must be a valid http(s) URL.");
+    error.statusCode = 400;
+    throw error;
+  }
+};
+
+const applyUploadedVideo = async (target, videoFile, body = {}, oldPublicId = "") => {
+  if (videoFile) {
+    const uploaded = await uploadVideo(videoFile.path);
+    target.videoUrl = uploaded.url;
+    target.videoPublicId = uploaded.publicId;
+
+    if (oldPublicId && oldPublicId !== uploaded.publicId) {
+      await deleteFromCloudinary(oldPublicId, "video");
+    }
+    return true;
+  }
+
+  if (body.videoUrl !== undefined && body.videoUrl !== "") {
+    requireValidRemoteVideo(body.videoUrl);
+    target.videoUrl = body.videoUrl;
+    target.videoPublicId = body.videoPublicId || "";
+    return true;
+  }
+
+  return false;
+};
 
 const parseListField = (value) => {
   if (Array.isArray(value)) return value;
@@ -15,7 +59,7 @@ const parseListField = (value) => {
   return value.split("\n").map((item) => item.trim()).filter(Boolean);
 };
 
-const buildCoursePayload = (body, file) => {
+const buildCoursePayload = async (body, files = {}, currentCourse = null) => {
   const allowedFields = [
     "title",
     "description",
@@ -29,6 +73,9 @@ const buildCoursePayload = (body, file) => {
     "learningOutcomes",
     "targetAudience",
     "thumbnail",
+    "thumbnailPublicId",
+    "videoUrl",
+    "videoPublicId",
   ];
   const payload = {};
 
@@ -50,8 +97,30 @@ const buildCoursePayload = (body, file) => {
     }
   });
 
-  if (file) {
-    payload.thumbnail = `/uploads/thumbnails/${file.filename}`;
+  if (payload.videoUrl !== undefined) {
+    requireValidRemoteVideo(payload.videoUrl);
+  }
+
+  const thumbnailFile = files?.thumbnail?.[0];
+  if (thumbnailFile) {
+    const uploaded = await uploadThumbnail(thumbnailFile.path);
+    payload.thumbnail = uploaded.url;
+    payload.thumbnailPublicId = uploaded.publicId;
+
+    if (currentCourse?.thumbnailPublicId) {
+      await deleteFromCloudinary(currentCourse.thumbnailPublicId, "image");
+    }
+  }
+
+  const videoFile = files?.video?.[0];
+  if (videoFile) {
+    const uploaded = await uploadVideo(videoFile.path);
+    payload.videoUrl = uploaded.url;
+    payload.videoPublicId = uploaded.publicId;
+
+    if (currentCourse?.videoPublicId) {
+      await deleteFromCloudinary(currentCourse.videoPublicId, "video");
+    }
   }
 
   return payload;
@@ -78,8 +147,9 @@ const getCourse = async (req, res) => {
 
 const createCourse = async (req, res) => {
   try {
+    const payload = await buildCoursePayload(req.body, req.files);
     const course = await Course.create({
-      ...buildCoursePayload(req.body, req.files?.thumbnail?.[0]),
+      ...payload,
       teacher: req.user._id,
     });
     await User.findByIdAndUpdate(req.user._id, {
@@ -87,7 +157,7 @@ const createCourse = async (req, res) => {
     });
     res.status(201).json({ success: true, course });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
@@ -95,11 +165,11 @@ const updateCourse = async (req, res) => {
   try {
     const course = await Course.findOne({ _id: req.params.id, teacher: req.user._id });
     if (!course) return res.status(404).json({ success: false, message: "Course not found." });
-    Object.assign(course, buildCoursePayload(req.body, req.files?.thumbnail?.[0]));
+    Object.assign(course, await buildCoursePayload(req.body, req.files, course));
     await course.save();
     res.json({ success: true, course });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
@@ -129,6 +199,10 @@ const addSection = async (req, res) => {
 
 const addLecture = async (req, res) => {
   try {
+    if (!req.body.title?.trim()) {
+      return res.status(400).json({ success: false, message: "Lecture title is required." });
+    }
+
     const course = await Course.findOne({ _id: req.params.id, teacher: req.user._id });
     if (!course) return res.status(404).json({ success: false, message: "Course not found." });
 
@@ -137,17 +211,23 @@ const addLecture = async (req, res) => {
 
     const videoFile = req.files?.video?.[0];
     const lectureData = {
-      ...req.body,
-      videoUrl: videoFile ? `/uploads/videos/${videoFile.filename}` : req.body.videoUrl,
+      title: req.body.title.trim(),
+      description: req.body.description || "",
+      isFree: req.body.isFree === true || req.body.isFree === "true",
       order: section.lectures.length,
     };
+
+    const hasVideo = await applyUploadedVideo(lectureData, videoFile, req.body);
+    if (!hasVideo) {
+      return res.status(400).json({ success: false, message: "Lecture video is required." });
+    }
 
     section.lectures.push(lectureData);
     course.totalLectures = course.sections.reduce((acc, s) => acc + s.lectures.length, 0);
     await course.save();
     res.json({ success: true, course });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
@@ -168,15 +248,15 @@ const updateLecture = async (req, res) => {
 
     if (req.body.title !== undefined) lectureFound.title = req.body.title;
     if (req.body.description !== undefined) lectureFound.description = req.body.description;
+    if (req.body.isFree !== undefined) lectureFound.isFree = req.body.isFree === true || req.body.isFree === "true";
+
     const videoFile = req.files?.video?.[0];
-    if (videoFile) {
-      lectureFound.videoUrl = `/uploads/videos/${videoFile.filename}`;
-    }
+    await applyUploadedVideo(lectureFound, videoFile, req.body, lectureFound.videoPublicId);
 
     await course.save();
     res.json({ success: true, course });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };
 
@@ -185,11 +265,21 @@ const deleteLecture = async (req, res) => {
     const course = await Course.findOne({ _id: req.params.courseId, teacher: req.user._id });
     if (!course) return res.status(404).json({ success: false, message: "Course not found." });
 
+    let deletedLecture = null;
     course.sections.forEach((section) => {
-      section.lectures = section.lectures.filter(
-        (l) => l._id.toString() !== req.params.lectureId
-      );
+      const lecture = section.lectures.id(req.params.lectureId);
+      if (lecture) deletedLecture = lecture;
+      section.lectures = section.lectures.filter((l) => l._id.toString() !== req.params.lectureId);
     });
+
+    if (!deletedLecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found." });
+    }
+
+    if (deletedLecture.videoPublicId) {
+      await deleteFromCloudinary(deletedLecture.videoPublicId, "video");
+    }
+
     course.totalLectures = course.sections.reduce((acc, s) => acc + s.lectures.length, 0);
     await course.save();
     res.json({ success: true, message: "Lecture deleted." });

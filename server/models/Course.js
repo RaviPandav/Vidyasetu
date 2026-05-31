@@ -48,7 +48,13 @@ const courseSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    thumbnailPublicId: {
+      type: String,
+      default: "",
+    },
     previewVideo: String,
+    videoUrl: String,
+    videoPublicId: String,
     teacher: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

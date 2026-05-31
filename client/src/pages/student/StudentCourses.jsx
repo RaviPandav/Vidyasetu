@@ -1,15 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { studentService } from "../../services";
+import { getAssetUrl } from "../../utils/urls";
 import { BookOpenIcon, MagnifyingGlassIcon, PlayCircleIcon } from "@heroicons/react/24/outline";
-
-const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
-const getAssetUrl = (url) => {
-  if (!url) return "";
-  if (/^https?:\/\//i.test(url)) return url;
-  const normalized = url.startsWith("/") ? url : `/${url}`;
-  return `${API_ORIGIN}${normalized}`;
-};
 
 export default function StudentCourses() {
   const [courses, setCourses] = useState([]);

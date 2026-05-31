@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import useAuthStore from "../context/authStore";
+import { SOCKET_ORIGIN } from "../utils/urls";
 
 let socketInstance = null;
 
@@ -12,7 +13,7 @@ export const useSocket = () => {
     if (!isAuthenticated || !token) return;
 
     if (!socketInstance) {
-      socketInstance = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000", {
+      socketInstance = io(SOCKET_ORIGIN, {
         auth: { token },
         transports: ["websocket"],
       });

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { publicService } from "../../services";
+import { getAssetUrl } from "../../utils/urls";
 import {
   AcademicCapIcon,
   ArrowRightIcon,
@@ -9,15 +10,7 @@ import {
   StarIcon,
 } from "@heroicons/react/24/outline";
 
-const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
 const LEVELS = ["", "Beginner", "Intermediate", "Advanced", "All Levels"];
-
-const getAssetUrl = (url) => {
-  if (!url) return "";
-  if (/^https?:\/\//i.test(url)) return url;
-  const normalized = url.startsWith("/") ? url : `/${url}`;
-  return `${API_ORIGIN}${normalized}`;
-};
 
 const cardVariants = {
   hidden: { opacity: 0, y: 22 },

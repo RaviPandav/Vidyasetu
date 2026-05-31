@@ -15,19 +15,23 @@ cloudinary.config({
  */
 const uploadToCloudinary = async (filePath, folder = "vidyasetu", resourceType = "auto") => {
   try {
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      throw new Error("Cloudinary credentials are not configured");
+    }
+
     const result = await cloudinary.uploader.upload(filePath, {
       folder,
       resource_type: resourceType,
       use_filename: true,
       unique_filename: true,
     });
-    // Delete local temp file after upload
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
     return { url: result.secure_url, publicId: result.public_id };
   } catch (error) {
     throw new Error(`Cloudinary upload failed: ${error.message}`);
+  } finally {
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   }
 };
 

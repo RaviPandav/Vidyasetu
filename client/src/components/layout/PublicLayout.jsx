@@ -142,8 +142,8 @@ export default function PublicLayout() {
               <h4 className="text-white font-semibold mb-3">Contact</h4>
               <ul className="space-y-2 text-sm">
                 <li>📧 hello@vidyasetu.com</li>
-                <li>📞 +91 98765 43210</li>
-                <li>📍 Ahmedabad, Gujarat</li>
+                <li>📞 +91 9558453510</li>
+                <li>📍 Surat, Gujarat</li>
               </ul>
             </div>
           </div>

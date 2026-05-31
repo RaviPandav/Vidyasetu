@@ -69,7 +69,7 @@ const seedStudent = async () => {
     role: "student",
     isEmailVerified: true,
     isActive: true,
-    phone: "+91 98765 43210",
+    phone: "+91 9558453510",
   });
   console.log("✅ Student created: student@vidyasetu.com / Student@123");
   return student;

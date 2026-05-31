@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 import { studentService } from "../../services";
+import { getAssetUrl } from "../../utils/urls";
 import { ChevronDownIcon, ChevronRightIcon, DocumentArrowDownIcon } from "@heroicons/react/24/outline";
 
 export default function StudentVideoPlayer() {
@@ -11,6 +12,7 @@ export default function StudentVideoPlayer() {
   const [openSections, setOpenSections] = useState({});
   const [loading, setLoading] = useState(true);
   const [attendanceMarked, setAttendanceMarked] = useState({});
+  const [videoError, setVideoError] = useState("");
 
   const dedupeItems = (items, key) => {
     const seen = new Set();
@@ -63,6 +65,15 @@ export default function StudentVideoPlayer() {
     }).catch(console.error);
   };
 
+  const handleNativeVideoProgress = (event) => {
+    const video = event.currentTarget;
+    if (!video.duration) return;
+    handleVideoProgress({ played: video.currentTime / video.duration });
+  };
+
+  const activeVideoUrl = activeLecture?.videoUrl ? getAssetUrl(activeLecture.videoUrl) : "";
+  const isUploadedVideo = /\.(mp4|webm|mov)(\?.*)?$/i.test(activeVideoUrl);
+
   if (loading) return (
     <div className="animate-pulse space-y-4">
       <div className="h-96 skeleton rounded-2xl" />
@@ -78,14 +89,35 @@ export default function StudentVideoPlayer() {
       <div className="flex-1 min-w-0">
         <div className="bg-black rounded-2xl overflow-hidden aspect-video mb-4">
           {activeLecture?.videoUrl ? (
-            <ReactPlayer
-              url={activeLecture.videoUrl}
-              width="100%"
-              height="100%"
-              controls
-              onProgress={handleVideoProgress}
-              onEnded={handleLectureComplete}
-            />
+            videoError ? (
+              <div className="w-full h-full flex items-center justify-center text-white/70 p-6 text-center">
+                <div>
+                  <div className="text-4xl mb-3">!</div>
+                  <p className="font-semibold">Video file not found or cannot be played.</p>
+                  <p className="mt-2 text-sm text-white/50 break-all">{activeVideoUrl}</p>
+                </div>
+              </div>
+            ) : isUploadedVideo ? (
+              <video
+                src={activeVideoUrl}
+                className="h-full w-full"
+                controls
+                controlsList="nodownload"
+                onTimeUpdate={handleNativeVideoProgress}
+                onEnded={handleLectureComplete}
+                onError={() => setVideoError("Video file not found or cannot be played.")}
+              />
+            ) : (
+              <ReactPlayer
+                url={activeVideoUrl}
+                width="100%"
+                height="100%"
+                controls
+                onProgress={handleVideoProgress}
+                onEnded={handleLectureComplete}
+                onError={() => setVideoError("Video file not found or cannot be played.")}
+              />
+            )
           ) : (
             <div className="w-full h-full flex items-center justify-center text-white/50">
               <div className="text-center">
@@ -109,7 +141,7 @@ export default function StudentVideoPlayer() {
                   {activeLecture.resources.map((r, i) => (
                     <a
                       key={i}
-                      href={r.url}
+                      href={getAssetUrl(r.url)}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-primary-50 hover:text-primary-600 rounded-lg text-sm font-medium transition-colors"
@@ -147,7 +179,10 @@ export default function StudentVideoPlayer() {
                     {section.lectures?.map((lecture) => (
                       <button
                         key={lecture._id}
-                        onClick={() => setActiveLecture(lecture)}
+                        onClick={() => {
+                          setVideoError("");
+                          setActiveLecture(lecture);
+                        }}
                         className={`w-full flex items-center gap-3 p-3 text-left hover:bg-primary-50 transition-colors ${
                           activeLecture?._id === lecture._id ? "bg-primary-50 text-primary-700" : "text-gray-700"
                         }`}

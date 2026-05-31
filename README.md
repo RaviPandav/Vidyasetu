@@ -323,4 +323,4 @@ VITE_APP_NAME=VidyaSetu
 
 ---
 
-Made with ❤️ in Ahmedabad, Gujarat 🇮🇳
+Made with ❤️ in Surat, Gujarat 🇮🇳

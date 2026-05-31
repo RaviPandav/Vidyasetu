@@ -5,6 +5,7 @@
 
 const express = require("express");
 const http = require("http");
+const path = require("path");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -83,7 +84,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // ── Static Files ────────────────────────────────────────
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth/me", (req, res, next) => {
   res.set("Cache-Control", "no-store");
   next();

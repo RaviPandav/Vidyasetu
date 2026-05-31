@@ -72,9 +72,9 @@ export default function Footer() {
             <EnvelopeIcon className="h-4 w-4" />
             hello@vidyasetu.com
           </a>
-          <a href="tel:+919876543210" className="inline-flex items-center gap-2 hover:text-primary-400">
+          <a href="tel:+919558453510" className="inline-flex items-center gap-2 hover:text-primary-400">
             <PhoneIcon className="h-4 w-4" />
-            +91 98765 43210
+            +91 9558453510
           </a>
           <span className="inline-flex items-center gap-2">
             <MapPinIcon className="h-4 w-4" />
