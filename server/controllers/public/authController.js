@@ -9,8 +9,8 @@ const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || "7d" });
 
 const shouldEnforceEmailVerification =
-  process.env.ENFORCE_EMAIL_VERIFICATION === "true" || process.env.NODE_ENV === "production";
-
+  process.env.ENFORCE_EMAIL_VERIFICATION === "true";
+  
 const disposableEmailDomains = new Set([
   "10minutemail.com",
   "20minutemail.com",
@@ -86,6 +86,7 @@ const validateRealEmail = async (email) => {
   return { valid: true, email: normalizedEmail };
 };
 
+
 // ── @route  POST /api/auth/register ──────────────────────
 const register = async (req, res) => {
   try {
@@ -93,45 +94,66 @@ const register = async (req, res) => {
 
     const emailValidation = await validateRealEmail(email);
     if (!emailValidation.valid) {
-      return res.status(400).json({ success: false, message: emailValidation.message });
+      return res.status(400).json({
+        success: false,
+        message: emailValidation.message,
+      });
     }
 
-    // Only allow student/teacher self-registration
     if (role === "admin") {
-      return res.status(403).json({ success: false, message: "Cannot register as admin." });
+      return res.status(403).json({
+        success: false,
+        message: "Cannot register as admin.",
+      });
     }
 
-    const existingUser = await User.findOne({ email: emailValidation.email });
+    const existingUser = await User.findOne({
+      email: emailValidation.email,
+    });
+
     if (existingUser) {
-      return res.status(400).json({ success: false, message: "Email already registered." });
+      return res.status(400).json({
+        success: false,
+        message: "Email already registered.",
+      });
     }
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
+
     const user = await User.create({
       name,
       email: emailValidation.email,
       password,
       role: role || "student",
       phone,
-      emailVerificationToken: crypto.createHash("sha256").update(verificationToken).digest("hex"),
-      emailVerificationExpires: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+      isEmailVerified: true, // auto verify
+
+      emailVerificationToken: crypto
+        .createHash("sha256")
+        .update(verificationToken)
+        .digest("hex"),
+
+      emailVerificationExpires:
+        Date.now() + 24 * 60 * 60 * 1000,
     });
 
-    // Send verification email
-    const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
-    await emailService.sendVerificationEmail(user.email, user.name, verifyUrl);
-
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message:
-        shouldEnforceEmailVerification
-          ? "Registration successful! Please check your email to verify your account before login."
-          : "Registration successful!",
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
-      ...(process.env.NODE_ENV !== "production" && { verifyUrl }),
+      message: "Registration successful!",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error("Register Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 
