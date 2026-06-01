@@ -15,7 +15,11 @@ cloudinary.config({
  */
 const uploadToCloudinary = async (filePath, folder = "vidyasetu", resourceType = "auto") => {
   try {
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
       throw new Error("Cloudinary credentials are not configured");
     }
 
@@ -24,10 +28,26 @@ const uploadToCloudinary = async (filePath, folder = "vidyasetu", resourceType =
       resource_type: resourceType,
       use_filename: true,
       unique_filename: true,
+
+      // IMPORTANT: chunked upload to avoid size/connection issues on hosted platforms
+      chunk_size: 6000000, // ~6MB
     });
+
     return { url: result.secure_url, publicId: result.public_id };
   } catch (error) {
-    throw new Error(`Cloudinary upload failed: ${error.message}`);
+    const statusCode =
+      error?.http_code ||
+      error?.status ||
+      error?.statusCode;
+
+    const cloudinaryDetails =
+      error?.error?.message ||
+      error?.message ||
+      JSON.stringify(error?.error || {}, null, 2);
+
+    const err = new Error(`Cloudinary upload failed: ${cloudinaryDetails}`);
+    if (statusCode) err.statusCode = statusCode;
+    throw err;
   } finally {
     if (filePath && fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
