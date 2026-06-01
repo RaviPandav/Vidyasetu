@@ -11,6 +11,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
+const multer = require("multer");
 const dotenv = require("dotenv");
 
 dotenv.config({ path: path.join(__dirname, ".env") });
@@ -33,7 +34,6 @@ const studentRoutes = require("./routes/student/studentRoutes");
 connectDB();
 
 const app = express();
-const Port = process.env.PORT || 4000;
 const server = http.createServer(app);
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
@@ -46,6 +46,7 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(mongoSanitize());
 
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // ── Rate Limiting ───────────────────────────────────────
 const parseEnvNumber = (value, fallback) => {
@@ -79,15 +80,31 @@ app.use("/api", apiLimiter);
 app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ extended: true, limit: "200mb" }));
 
-// Handle 413 Payload Too Large consistently with JSON response.
+// Handle upload / body size errors consistently with JSON response.
 app.use((err, req, res, next) => {
-  if (err && (err.type === "entity.too.large" || err.status === 413 || err.statusCode === 413)) {
+  if (!err) return next();
+
+  const isPayloadTooLarge =
+    err.type === "entity.too.large" ||
+    err.status === 413 ||
+    err.statusCode === 413 ||
+    err.code === "LIMIT_FILE_SIZE";
+
+  if (isPayloadTooLarge) {
     return res.status(413).json({
       success: false,
       message:
         "Upload is too large for this server. Please try a smaller video/file or increase server upload limits.",
     });
   }
+
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      message: err.message || "File upload failed.",
+    });
+  }
+
   return next(err);
 });
 
@@ -157,12 +174,28 @@ if (process.env.NODE_ENV === "production") {
 app.use(errorHandler);
 
 // ── Start Server ────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-});
+const PORT = parseEnvNumber(process.env.PORT, 5000);
+server.listen(PORT)
+  .on("listening", () => {
+    console.log(`✅ Server listening on port ${PORT}`);
+  })
+  .on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(`❌ Port ${PORT} is already in use. Set a different PORT or stop the process using it.`);
+    } else {
+      console.error("❌ Server error:", err);
+    }
+    process.exit(1);
+  });
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Rejection:", err.message);
+  console.error("Unhandled Rejection:", err);
+
+  if (err && (err.code === "LIMIT_FILE_SIZE" || err.code === "LIMIT_PART_COUNT" || err.code === "LIMIT_FILE_COUNT")) {
+    console.warn("Known upload error; keeping server alive.");
+    return;
+  }
+
   server.close(() => process.exit(1));
 });

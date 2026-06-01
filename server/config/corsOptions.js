@@ -1,6 +1,10 @@
 const defaultAllowedOrigins = [
   "http://localhost:5173",
+  "http://localhost:5174",
+  "http://localhost:5175",
   "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
+  "http://127.0.0.1:5175",
   "https://vidyasetu-frontend.onrender.com",
 ];
 
@@ -12,6 +16,8 @@ const parseOrigins = (value) =>
         .filter(Boolean)
     : [];
 
+const allowAllOrigins = process.env.CORS_ALLOW_ALL === "true";
+
 const allowedOrigins = [
   ...defaultAllowedOrigins,
   ...parseOrigins(process.env.CLIENT_URL),
@@ -21,6 +27,10 @@ const allowedOrigins = [
 ];
 
 const originSet = new Set(allowedOrigins);
+console.log("✅ CORS allowed origins:", Array.from(originSet));
+if (allowAllOrigins) {
+  console.log("⚠️ CORS_ALLOW_ALL=true: permissive CORS is enabled");
+}
 
 const isLanDevOrigin = (origin) => {
   if (process.env.NODE_ENV === "production") return false;
@@ -43,6 +53,13 @@ const isLanDevOrigin = (origin) => {
 };
 
 const corsOrigin = (origin, callback) => {
+  console.log("🔍 CORS request origin:", origin);
+
+  if (allowAllOrigins) {
+    callback(null, true);
+    return;
+  }
+
   if (!origin || originSet.has(origin) || isLanDevOrigin(origin)) {
     callback(null, true);
     return;
@@ -55,7 +72,18 @@ const corsOptions = {
   origin: corsOrigin,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: [
+    "Origin",
+    "X-Requested-With",
+    "Content-Type",
+    "Authorization",
+    "Accept",
+    "Cache-Control",
+    "Access-Control-Request-Method",
+    "Access-Control-Request-Headers",
+  ],
+  exposedHeaders: ["Authorization"],
+  preflightContinue: false,
   optionsSuccessStatus: 204,
 };
 

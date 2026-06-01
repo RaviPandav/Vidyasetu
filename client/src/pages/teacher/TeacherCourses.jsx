@@ -309,6 +309,7 @@ function LectureModal({ course, onClose, onSaved }) {
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [form, setForm] = useState({ title: "", description: "", video: null });
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -321,6 +322,7 @@ function LectureModal({ course, onClose, onSaved }) {
       return;
     }
     setLoading(true);
+    setUploadProgress(0);
     try {
       let targetSectionId = sectionId;
       if (!targetSectionId) {
@@ -333,6 +335,7 @@ function LectureModal({ course, onClose, onSaved }) {
       const formData = new FormData();
       formData.append("title", form.title);
       formData.append("description", form.description);
+
       if (form.video) {
         formData.append("video", form.video);
       }
@@ -343,10 +346,12 @@ function LectureModal({ course, onClose, onSaved }) {
       onClose();
     } catch (err) {
       toast.error(
-        err.response?.data?.message || "Failed to add lecture video.",
+        err.response?.data?.message || err.message || "Failed to add lecture video.",
       );
+    } finally {
+      setLoading(false);
+      setUploadProgress(0);
     }
-    setLoading(false);
   };
 
   return (
@@ -442,6 +447,19 @@ function LectureModal({ course, onClose, onSaved }) {
             <p className="text-xs text-gray-500 mt-1">
               Upload a video file to attach to this lecture.
             </p>
+            {uploadProgress > 0 && uploadProgress < 100 ? (
+              <div className="mt-3">
+                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Uploading video: {uploadProgress}%
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex gap-3 pt-2">

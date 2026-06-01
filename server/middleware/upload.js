@@ -41,6 +41,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// Provide a safer error path so we never abruptly reset the connection on bad uploads.
 const upload = multer({
   storage,
   fileFilter,
@@ -51,5 +52,5 @@ const upload = multer({
   },
 });
 
-
 module.exports = upload;
+

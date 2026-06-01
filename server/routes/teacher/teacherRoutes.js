@@ -15,6 +15,9 @@ const {
   getCourseStudents,
 } = require("../../controllers/teacher/teacherCourseController");
 const {
+  getCloudinarySignature,
+} = require("../../controllers/teacher/teacherCloudinaryController");
+const {
   createQuiz,
   getMyQuizzes,
   updateQuiz,
@@ -52,6 +55,7 @@ router.use(protect, authorize("teacher", "admin"));
 router.get("/dashboard", getTeacherDashboard);
 
 // Courses
+router.get("/cloudinary/signature", getCloudinarySignature);
 router.get("/courses", getMyCourses);
 router.get("/courses/:id", getCourse);
 router.get("/courses/:id/students", getCourseStudents);

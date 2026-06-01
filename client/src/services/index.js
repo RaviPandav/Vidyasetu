@@ -49,6 +49,7 @@ export const teacherService = {
   getDashboard: () => api.get("/teacher/dashboard"),
   getCourses: () => api.get("/teacher/courses"),
   getCourseStudents: (id) => api.get(`/teacher/courses/${id}/students`),
+  getCloudinarySignature: () => api.get("/teacher/cloudinary/signature"),
   createCourse: (data) => api.post("/teacher/courses", data, data instanceof FormData ? multipartConfig : undefined),
   updateCourse: (id, data) => api.put(`/teacher/courses/${id}`, data, data instanceof FormData ? multipartConfig : undefined),
   publishCourse: (id) => api.post(`/teacher/courses/${id}/publish`),

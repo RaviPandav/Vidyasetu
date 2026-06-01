@@ -89,6 +89,15 @@ router.get("/teachers", async (req, res) => {
   }
 });
 
+// GET /api/public/cors-debug - Check CORS origin and allowed origins
+router.get("/cors-debug", (req, res) => {
+  res.json({
+    success: true,
+    origin: req.get("Origin") || null,
+    allowedOrigins: Array.from(require("../../config/corsOptions").allowedOrigins),
+  });
+});
+
 // POST /api/public/inquiry - Submit inquiry/lead form
 router.post("/inquiry", async (req, res) => {
   try {

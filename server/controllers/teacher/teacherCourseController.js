@@ -23,14 +23,23 @@ const requireValidRemoteVideo = (videoUrl) => {
   }
 };
 
+const ensureUploadResult = (uploaded, context) => {
+  if (!uploaded || !uploaded.url || !uploaded.publicId) {
+    const error = new Error(`Cloudinary ${context} did not return a valid URL and publicId.`);
+    error.statusCode = 502;
+    throw error;
+  }
+};
+
 const applyUploadedVideo = async (target, videoFile, body = {}, oldPublicId = "") => {
   if (videoFile) {
     const uploaded = await uploadVideo(videoFile.path);
+    ensureUploadResult(uploaded, "video upload");
 
     // Logging requirement: Cloudinary upload success
     console.log("☁️ ✅ [Cloudinary] uploadVideo success:", {
-      url: uploaded?.url,
-      publicId: uploaded?.publicId,
+      url: uploaded.url,
+      publicId: uploaded.publicId,
     });
 
     target.videoUrl = uploaded.url;
@@ -51,6 +60,7 @@ const applyUploadedVideo = async (target, videoFile, body = {}, oldPublicId = ""
 
   return false;
 };
+
 
 const parseListField = (value) => {
   if (Array.isArray(value)) return value;
@@ -111,6 +121,7 @@ const buildCoursePayload = async (body, files = {}, currentCourse = null) => {
   const thumbnailFile = files?.thumbnail?.[0];
   if (thumbnailFile) {
     const uploaded = await uploadThumbnail(thumbnailFile.path);
+    ensureUploadResult(uploaded, "thumbnail upload");
     payload.thumbnail = uploaded.url;
     payload.thumbnailPublicId = uploaded.publicId;
 
@@ -122,6 +133,7 @@ const buildCoursePayload = async (body, files = {}, currentCourse = null) => {
   const videoFile = files?.video?.[0];
   if (videoFile) {
     const uploaded = await uploadVideo(videoFile.path);
+    ensureUploadResult(uploaded, "video upload");
     payload.videoUrl = uploaded.url;
     payload.videoPublicId = uploaded.publicId;
 
@@ -217,6 +229,10 @@ const addLecture = async (req, res) => {
     if (!section) return res.status(404).json({ success: false, message: "Section not found." });
 
     const videoFile = req.files?.video?.[0];
+    if (!videoFile && (!req.body.videoUrl || req.body.videoUrl === "")) {
+      return res.status(400).json({ success: false, message: "Lecture video is required." });
+    }
+
     const lectureData = {
       title: req.body.title.trim(),
       description: req.body.description || "",
@@ -224,6 +240,7 @@ const addLecture = async (req, res) => {
       order: section.lectures.length,
     };
 
+    // Upload/resolve video first. This is the most failure-prone part.
     const hasVideo = await applyUploadedVideo(lectureData, videoFile, req.body);
     if (!hasVideo) {
       return res.status(400).json({ success: false, message: "Lecture video is required." });

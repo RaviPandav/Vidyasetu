@@ -7,6 +7,25 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+const removeLocalFile = (filePath) => {
+  if (!filePath) return;
+  try {
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (cleanupError) {
+    console.error(`Failed to cleanup local file: ${filePath}`, cleanupError);
+  }
+};
+
+const cloudinaryUpload = (methodName, filePath, options) =>
+  new Promise((resolve, reject) => {
+    cloudinary.uploader[methodName](filePath, options, (error, result) => {
+      if (error) return reject(error);
+      resolve(result);
+    });
+  });
+
 /**
  * Upload a file to Cloudinary
  * @param {string} filePath - Local file path
@@ -23,35 +42,27 @@ const uploadToCloudinary = async (filePath, folder = "vidyasetu", resourceType =
       throw new Error("Cloudinary credentials are not configured");
     }
 
-    const result = await cloudinary.uploader.upload(filePath, {
+    const result = await cloudinaryUpload("upload", filePath, {
       folder,
       resource_type: resourceType,
       use_filename: true,
       unique_filename: true,
-
-      // IMPORTANT: chunked upload to avoid size/connection issues on hosted platforms
-      chunk_size: 6000000, // ~6MB
+      chunk_size: 6000000,
     });
 
     return { url: result.secure_url, publicId: result.public_id };
   } catch (error) {
-    const statusCode =
-      error?.http_code ||
-      error?.status ||
-      error?.statusCode;
-
+    const statusCode = error?.http_code || error?.status || error?.statusCode;
     const cloudinaryDetails =
       error?.error?.message ||
       error?.message ||
-      JSON.stringify(error?.error || {}, null, 2);
+      JSON.stringify(error?.error || error || {}, null, 2);
 
     const err = new Error(`Cloudinary upload failed: ${cloudinaryDetails}`);
     if (statusCode) err.statusCode = statusCode;
     throw err;
   } finally {
-    if (filePath && fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    removeLocalFile(filePath);
   }
 };
 
@@ -85,7 +96,11 @@ const uploadThumbnail = (filePath) =>
  */
 const uploadVideo = async (filePath) => {
   try {
-    const result = await cloudinary.uploader.upload_large(filePath, {
+    if (!filePath) {
+      throw new Error("Video file path is required for uploadVideo");
+    }
+
+    const result = await cloudinaryUpload("upload_large", filePath, {
       folder: "vidyasetu/videos",
       resource_type: "video",
       chunk_size: 6000000,
@@ -97,10 +112,14 @@ const uploadVideo = async (filePath) => {
       url: result.secure_url,
       publicId: result.public_id,
     };
+  } catch (error) {
+    const cloudinaryDetails =
+      error?.error?.message || error?.message || JSON.stringify(error || {}, null, 2);
+    const err = new Error(`Cloudinary video upload failed: ${cloudinaryDetails}`);
+    if (error?.http_code) err.statusCode = error.http_code;
+    throw err;
   } finally {
-    if (filePath && fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    removeLocalFile(filePath);
   }
 };
 
