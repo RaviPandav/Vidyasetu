@@ -75,8 +75,21 @@ app.use("/api/auth", authLimiter);
 app.use("/api", apiLimiter);
 
 // ── Body Parsing ────────────────────────────────────────
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+// Keep JSON/urlencoded limits higher for requests that include large payloads on some clients.
+app.use(express.json({ limit: "200mb" }));
+app.use(express.urlencoded({ extended: true, limit: "200mb" }));
+
+// Handle 413 Payload Too Large consistently with JSON response.
+app.use((err, req, res, next) => {
+  if (err && (err.type === "entity.too.large" || err.status === 413 || err.statusCode === 413)) {
+    return res.status(413).json({
+      success: false,
+      message:
+        "Upload is too large for this server. Please try a smaller video/file or increase server upload limits.",
+    });
+  }
+  return next(err);
+});
 
 // ── Logger ──────────────────────────────────────────────
 if (process.env.NODE_ENV === "development") {
@@ -117,6 +130,10 @@ app.use("/api/student", studentRoutes);
 // ── 404 / SPA Fallback ────────────────────────────────────
 const clientDistPath = path.join(__dirname, "../client/dist");
 
+// Note: If Render returns 413, it may be coming from the proxy/router layer.
+// This app-side handling helps for cases where Express body parsing or multer triggers 413.
+
+
 if (process.env.NODE_ENV === "production") {
   // Serve static client build
   app.use(express.static(clientDistPath));
@@ -142,13 +159,6 @@ app.use(errorHandler);
 // ── Start Server ────────────────────────────────────────
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`
-  ╔════════════════════════════════════╗
-  ║   🎓 VidyaSetu API Running         ║
-  ║   Port    : ${PORT}                  ║
-  ║   Mode    : ${process.env.NODE_ENV}          ║
-  ╚════════════════════════════════════╝
-  `);
 });
 
 // Handle unhandled promise rejections

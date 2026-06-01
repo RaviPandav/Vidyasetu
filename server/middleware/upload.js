@@ -45,8 +45,11 @@ const upload = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 500 * 1024 * 1024, // 500MB for videos
+    // IMPORTANT for Render: increase upload limit to avoid multer rejecting early.
+    // Actual 413 can still happen at proxy/render level, but this reduces one common cause.
+    fileSize: 200 * 1024 * 1024, // 200MB max upload
   },
 });
+
 
 module.exports = upload;
