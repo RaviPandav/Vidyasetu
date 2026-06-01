@@ -13,7 +13,7 @@ const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("express-mongo-sanitize");
 const dotenv = require("dotenv");
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, ".env") });
 
 const connectDB = require("./config/db");
 const { corsOptions } = require("./config/corsOptions");
@@ -114,10 +114,27 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/teacher", teacherRoutes);
 app.use("/api/student", studentRoutes);
 
-// ── 404 Handler ─────────────────────────────────────────
-app.use("*", (req, res) => {
-  res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
-});
+// ── 404 / SPA Fallback ────────────────────────────────────
+const clientDistPath = path.join(__dirname, "../client/dist");
+
+if (process.env.NODE_ENV === "production") {
+  // Serve static client build
+  app.use(express.static(clientDistPath));
+
+  // Return index.html for all non-API routes (SPA fallback)
+  app.get("*", (req, res) => {
+    if (req.originalUrl.startsWith("/api")) {
+      res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+      return;
+    }
+    res.sendFile(path.join(clientDistPath, "index.html"));
+  });
+} else {
+  // Development / API-only fallback
+  app.use("*", (req, res) => {
+    res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
+  });
+}
 
 // ── Global Error Handler ────────────────────────────────
 app.use(errorHandler);
