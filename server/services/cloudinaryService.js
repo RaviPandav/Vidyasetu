@@ -83,8 +83,26 @@ const uploadThumbnail = (filePath) =>
 /**
  * Upload lecture video
  */
-const uploadVideo = (filePath) =>
-  uploadToCloudinary(filePath, "vidyasetu/videos", "video");
+const uploadVideo = async (filePath) => {
+  try {
+    const result = await cloudinary.uploader.upload_large(filePath, {
+      folder: "vidyasetu/videos",
+      resource_type: "video",
+      chunk_size: 6000000,
+      use_filename: true,
+      unique_filename: true,
+    });
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id,
+    };
+  } finally {
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  }
+};
 
 /**
  * Upload PDF / study material

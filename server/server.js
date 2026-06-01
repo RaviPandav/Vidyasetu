@@ -76,7 +76,7 @@ app.use("/api", apiLimiter);
 
 // ── Body Parsing ────────────────────────────────────────
 // Keep JSON/urlencoded limits higher for requests that include large payloads on some clients.
-app.use(express.json({ limit: "200mb" }));
+app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ extended: true, limit: "200mb" }));
 
 // Handle 413 Payload Too Large consistently with JSON response.
